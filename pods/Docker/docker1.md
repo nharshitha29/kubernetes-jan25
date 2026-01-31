@@ -7,6 +7,7 @@ sudo usermod -aG docker ubuntu
 
 DOCKERFILE - BUILDING DOCKER IMAGE FROM PACKAGE  [JAVA APPLICATION]
 -----------------------------------------------
+```bash
 FROM eclipse-temurin:21-alpine
 LABEL author=harshitha
 LABEL project=learning

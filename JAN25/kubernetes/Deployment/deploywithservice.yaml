@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-1
+  labels:
+     app: web1
+  annotations:
+     kubernetes.io/change-cause: "spring"
+spec:
+   minReadySeconds: 3
+   replicas: 3
+   revisionHistoryLimit: 10
+   selector:
+     matchLabels:
+         app: web1
+   strategy:
+     type: RollingUpdate
+     rollingUpdate:
+         maxSurge: 25%
+         maxUnavailable: 25%
+   template:
+     metadata:
+         labels:
+            app: web1 
+   spec:
+     containers:
+         - name: spring
+           image: nharshitha29/spring:v1.0
+           ssports:
+              - containerPort: 8080 
+---       
+apiVersion: v1
+kind: Service
+metadata:
+   name: service-1
+spec:
+   type: NodePort
+   selector:
+        app: web1 
+   ports:
+     - name: web1
+       port: 80
+       protocol: TCP
+       targetPort: 8080
+       nodePort: 30000
+

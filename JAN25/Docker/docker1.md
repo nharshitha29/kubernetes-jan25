@@ -1,13 +1,13 @@
-DOCKER INSTALLATION SCRIPT
----------------------------
+## DOCKER INSTALLATION SCRIPT
+    -------------------------
 ```bash
 curl -fsSL https://get.docker.com -o /tmp/install-docker.sh
 sh /tmp/install-docker.sh
 
 sudo usermod -aG docker ubuntu
 
-DOCKERFILE - BUILDING DOCKER IMAGE FROM PACKAGE  [JAVA APPLICATION]
------------------------------------------------
+## DOCKERFILE - BUILDING DOCKER IMAGE FROM PACKAGE  [JAVA APPLICATION]
+     -----------------------------------------------
 ```bash
 
 FROM eclipse-temurin:21-alpine
@@ -21,10 +21,10 @@ COPY --chown=spc:spc /spc/target/spring-petclinic-3.3.0-SNAPSHOT.jar /app/spring
 WORKDIR /app
 CMD ["java", "-jar", "spring-petclinic-3.3.0-SNAPSHOT.jar"]
 
-DOCKERFILE - BUILDING DOCKER IMAGE FROM CODE
---------------------------------------------
-MULTI-STAGE DOCKERFILE
-----------------------
+## DOCKERFILE - BUILDING DOCKER IMAGE FROM CODE
+   --------------------------------------------
+## MULTI-STAGE DOCKERFILE
+   ----------------------
 
 FROM maven:3-eclipse-temurin-21-alpine AS builder
 COPY . /spc

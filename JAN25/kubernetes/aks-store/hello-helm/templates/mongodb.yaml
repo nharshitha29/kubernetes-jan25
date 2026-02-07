@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.statefulset.name }}
+spec:
+  serviceName: mongodb
+  replicas: {{ .Values.statefulset.replicas }}
+  selector:
+    matchLabels: {{ .Values.statefulset.labels | toYaml | nindent 6}}
+  template:
+    metadata:
+      labels: {{ .Values.statefulset.labels | toYaml | nindent  8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: {{ .Values.statefulset.name }}
+          image: mcr.microsoft.com/mirror/docker/library/mongo:{{ .Values.container.tag }}
+          ports:
+            - containerPort: {{ .Values.container.ports.containerPort }}
+              name: {{ .Values.statefulset.name }}
+          resources: {{ .Values.container.resources | toYaml | nindent 12 }}
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - "--eval"
+                - db.runCommand('ping').ok
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          readinessProbe:
+            exec:
+              command:
+                - mongo
+                - "--eval"
+                - db.runCommand('ping').ok
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.statefulset.name }}
+spec:
+  ports:
+    - port: {{ .Values.container.ports.containerPort }}
+  selector: {{ .Values.statefulset.labels | toYaml | nindent 6}}
+  type: {{.Values.type }}

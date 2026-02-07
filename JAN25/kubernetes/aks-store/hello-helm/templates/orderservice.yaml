@@ -1,0 +1,73 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.configmap1.name }}
+data:
+  ORDER_QUEUE_PORT: "5672"
+  ORDER_QUEUE_HOSTNAME: "rabbitmq"
+  ORDER_QUEUE_NAME: "orders"
+  FASTIFY_ADDRESS: "0.0.0.0"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name:  {{ .Values.secret1.name }}
+data:
+  ORDER_QUEUE_USERNAME: dXNlcm5hbWU=
+  ORDER_QUEUE_PASSWORD: cGFzc3dvcmQ=
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.order.name }}
+spec:
+  replicas: {{ .Values.order.replicas }}
+  selector:
+    matchLabels: {{ .Values.order.labels | toYaml | nindent 6 }}
+  template:
+    metadata: 
+      labels: {{ .Values.order.labels | toYaml | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: {{ .Values.order.name }}
+          image: ghcr.io/azure-samples/aks-store-demo/order-service:{{ .Values.containers.tag }}
+          ports: {{ .Values.containers.ports | toYaml | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configmap1.name }}
+            - secretRef:
+                name: {{ .Values.secret1.name }}
+          resources: {{ .Values.containers.resources | toYaml | nindent 12 }}
+          startupProbe: 
+            httpGet: {{ .Values.containers.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.containers.startupProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.containers.startupProbe.initialDelaySeconds }} 
+            periodSeconds: {{ .Values.containers.startupProbe.periodSeconds }} 
+          readinessProbe:
+            httpGet: {{ .Values.containers.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.containers.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.containers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.containers.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet: {{ .Values.containers.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.containers.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.containers.livenessProbe.initialDelaySeconds}}
+            periodSeconds: {{ .Values.containers.livenessProbe.periodSeconds}}
+      initContainers:
+        - name: {{ .Values.initContainers.name }}
+          image: busybox:{{ .Values.initContainers.tag }}
+          command:
+            ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
+          resources: {{ .Values.containers.resources | toYaml | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.order.name }}
+spec:
+  type: {{ .Values.spec.type }}
+  ports: {{ .Values.spec.ports | toYaml | nindent 4 }}
+  selector: {{ .Values.order.labels | toYaml | nindent 6 }}

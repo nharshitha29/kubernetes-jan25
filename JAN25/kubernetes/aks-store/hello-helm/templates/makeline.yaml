@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels: {{ .Values.labels | toYaml | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ .Values.labels | toYaml | nindent 8 }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: {{ .Values.name }}
+          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:{{ .Values.tag }}
+          ports: {{ .Values.ports1 | toYaml | nindent 12 }}
+          env:
+            - name: ORDER_QUEUE_URI
+              value: "amqp://rabbitmq:5672"
+            - name: ORDER_QUEUE_USERNAME
+              value: "username"
+            - name: ORDER_QUEUE_PASSWORD
+              value: "password"
+            - name: ORDER_QUEUE_NAME
+              value: "orders"
+            - name: ORDER_DB_URI
+              value: "mongodb://mongodb:27017"
+            - name: ORDER_DB_NAME
+              value: "orderdb"
+            - name: ORDER_DB_COLLECTION_NAME
+              value: "orders"
+          resources: {{ .Values.resources | toYaml | nindent 12 }}
+          startupProbe: 
+            httpGet: {{ .Values.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+          readinessProbe:
+            httpGet: {{ .Values.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.readinessProbe1.failureThreshold }}
+            initialDelaySeconds: {{ .Values.readinessProbe1.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe1.periodSeconds }}
+          livenessProbe:
+            httpGet: {{ .Values.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.livenessProbe1.failureThreshold }}
+            initialDelaySeconds: {{ .Values.livenessProbe1.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe1.periodSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+spec: 
+  type: {{ .Values.spec1.type }}
+  potrs: {{ .Values.spec1.ports | toYaml | nindent 4 }}
+  selector: {{ .Values.labels | toYaml | nindent 6 }}
+

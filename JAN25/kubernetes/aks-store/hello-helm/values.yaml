@@ -1,0 +1,165 @@
+---
+statefulset:
+   name:  mongodb
+   replicas: 1
+   labels:
+       app: mongodb
+container:
+    tag: 4.2
+    ports:
+       containerPort: 27017
+    resources:
+      requests:
+        cpu: 5m
+        memory: 75Mi
+      limits:
+        cpu: 25m
+        memory: 1024Mi
+livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+readinessProbe:
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 3
+type: ClusterIP
+---
+configmap:
+   name: rabbitmq-enabled-plugins
+secret:
+   name: rabbitmq-secrets
+rabbit:
+   name: rabbitmq
+   serviceName: rabbitmq
+   replicas: 1
+   labels:
+       app: rabbitmq
+container1:
+    name: rabbitmq
+    tag: 3.13
+    ports:
+     - containerPort: 5672
+       name: rabbitmq-amqp
+     - containerPort: 15672
+       name: rabbitmq-http
+    resources:
+      requests:
+        cpu: 10m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+    startupProbe:
+      tcpSocket:
+        port: 5672
+      failureThreshold: 30
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    readinessProbe:
+      tcpSocket:
+        port: 5672
+      failureThreshold: 3
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    livenessProbe:
+      tcpSocket:
+        port: 5672
+      failureThreshold: 3
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    volumeMounts:
+        name: rabbitmq-enabled-plugins
+        mountPath: /etc/rabbitmq/enabled_plugins
+        subPath: enabled_plugins
+path: enabled_plugins
+ports:
+   - name: rabbitmq-amqp
+     port: 5672
+     targetPort: 5672
+   - name: rabbitmq-http
+     port: 15672
+     targetPort: 15672
+type1: ClusterIP
+---
+configmap1:
+   name: order-service-configs
+secret1: 
+   name: order-service-secrets
+order:
+   name: order-service
+   replicas: 1
+   labels:
+       app: order-service
+containers:
+    tag: 2.1.0
+    ports:
+     - containerPort: 3000
+    resources:
+      requests: 
+        cpu: 1m
+        memory: 50Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+    startupProbe:
+      httpGet:
+        path: /health
+        port: 3000
+      failureThreshold: 5
+      initialDelaySeconds: 20
+      periodSeconds: 10
+    readinessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 3
+      periodSeconds: 5
+    livenessProbe:
+      failureThreshold: 5
+      initialDelaySeconds: 3
+      periodSeconds: 3
+initContainers:
+     name: wait-for-rabbitmq
+     tag: 1.37.0
+spec:
+   type: ClusterIP
+   ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+---
+name: makeline-service
+replicas: 1
+labels:
+   app: makeline-service
+tag: 2.1.0
+ports1:
+  - containerPort: 3001
+resources:
+    requests:
+       cpu: 1m
+       memory: 6Mi
+    limits:
+       cpu: 5m
+       memory: 20Mi
+startupProbe:
+   httpGet:
+      path: /health
+      port: 3000
+   failureThreshold: 10
+   periodSeconds: 5
+readinessProbe1:
+   failureThreshold: 3
+   initialDelaySeconds: 3
+   periodSeconds: 5
+livenessProbe1:
+   failureThreshold: 5
+   initialDelaySeconds: 3
+   periodSeconds: 3
+spec1:
+   type: ClusterIP
+   ports:
+    - name: http
+      port: 3001
+      targetPort: 3001   

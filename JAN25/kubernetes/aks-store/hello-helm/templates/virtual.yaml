@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.virtual.name }}
+spec:
+  replicas: {{ .Values.virtual.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.virtual.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.virtual.name }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: {{ .Values.virtual.name }}
+          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:{{ .Values.virtual.tag }}
+          env:
+            - name: ORDER_SERVICE_URL
+              value: http://order-service:3000/
+            - name: ORDERS_PER_HOUR
+              value: "100"
+          resources: {{ .Values.virtual.resources | toYaml | nindent 12 }}
+          readinessProbe: 
+            exec: 
+               command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 18 }}
+            failureThreshold: {{ .Values.virtual.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.virtual.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.virtual.readinessProbe.periodSeconds }}
+          livenessProbe:
+            exec: 
+               command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 18 }}
+            failureThreshold: {{ .Values.virtual.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.virtual.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.virtual.livenessProbe.periodSeconds }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.virtualworker.name }}
+spec:
+  replicas: {{ .Values.virtual.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.virtualworker.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.virtualworker.name }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: {{ .Values.virtualworker.name }}
+          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:{{ .Values.virtual.tag }}
+          env:
+            - name: MAKELINE_SERVICE_URL
+              value: http://makeline-service:3001
+            - name: ORDERS_PER_HOUR
+              value: "100"
+          resources: {{ .Values.virtual.resources | toYaml | nindent 12 }}
+          readinessProbe:
+            exec:
+              command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 16 }}
+            failureThreshold: {{ .Values.virtual.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.virtual.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.virtual.readinessProbe.periodSeconds }}
+          livenessProbe:
+            exec:
+              command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 16 }}
+            failureThreshold: {{ .Values.virtual.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.virtual.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.virtual.livenessProbe.periodSeconds }}

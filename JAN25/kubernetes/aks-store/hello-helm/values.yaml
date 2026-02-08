@@ -163,3 +163,133 @@ spec1:
     - name: http
       port: 3001
       targetPort: 3001   
+---
+product:
+   name: product-service
+   labels:
+      app: product-service
+   tag: 2.1.0
+   ports:
+      - containerPort: 3002
+   resources:
+      requests:
+         cpu: 1m
+         memory: 1Mi
+      limits:
+         cpu: 2m
+         memory: 20Mi
+   readinessProbe:
+      httpGet:
+         path: /health
+         port: 3002
+      failureThreshold: 3
+      initialDelaySeconds: 3
+      periodSeconds: 5
+   livenessProbe:
+      failureThreshold: 5
+      initialDelaySeconds: 3
+      periodSeconds: 3
+   spec:
+     type: ClusterIP
+     ports:
+       - name: http
+         port: 3002
+         targetPort: 3002 
+---
+storeadmin:
+   name: store-admin
+   replicas: 1
+   tag: 2.1.0
+   ports:
+      - containerPort: 8081
+   resources:
+      requests:
+         cpu: 1m
+         memory: 200Mi
+      limits:
+         cpu: 1000m
+         memory: 512Mi
+   startupProbe:
+      httpGet:
+        path: /health
+        port: 8081
+      failureThreshold: 3
+      initialDelaySeconds: 5
+      periodSeconds: 5
+   readinessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 3
+      periodSeconds: 5
+   livenessProbe:
+      failureThreshold: 5
+      initialDelaySeconds: 3
+      periodSeconds: 3
+   spec:
+     type: LoadBalancer
+     ports:
+      - port: 80
+        targetPort: 8081
+---
+storefront:
+   name: store-front
+   replicas: 1
+   tag: 2.1.0
+   ports:
+      - containerPort: 8080
+        name: store-front
+   resources:
+      requests:
+         cpu: 1m
+         memory: 200Mi
+      limits:
+         cpu: 1000m
+         memory: 512Mi
+   startupProbe:
+      httpGet:
+        path: /health
+        port: 8080
+      failureThreshold: 3
+      initialDelaySeconds: 5
+      periodSeconds: 5
+   readinessProbe:
+      failureThreshold: 3
+      initialDelaySeconds: 3
+      periodSeconds: 3
+   livenessProbe:
+      failureThreshold: 5
+      initialDelaySeconds: 3
+      periodSeconds: 3
+   spec:
+     type: LoadBalancer
+     ports:
+      - port: 80
+        targetPort: 8080
+---
+virtual:
+   name: virtual-customer
+   replicas: 1
+   tag: 2.1.0
+   resources:
+      requests:
+         cpu: 1m
+         memory: 1Mi
+      limits:
+         cpu: 2m
+         memory: 20Mi
+   readinessProbe:
+      exec:
+         command:
+            - cat
+            - /proc/1/status
+      failureThreshold: 3
+      initialDelaySeconds: 3
+      periodSeconds: 5
+   livenessProbe:
+      failureThreshold: 5
+      initialDelaySeconds: 10
+      periodSeconds: 10
+virtualworker:
+     name: virtual-worker
+
+
+

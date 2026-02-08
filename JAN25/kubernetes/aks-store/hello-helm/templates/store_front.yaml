@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.storefront.name }}
+spec:
+  replicas: {{ .Values.storefront.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.storefront.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.storefront.name }}
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+        - name: {{ .Values.storefront.name }}
+          image: ghcr.io/azure-samples/aks-store-demo/store-front:{{ .Values.storefront.tag }}
+          ports: {{ .Values.storefront.ports | toYaml | nindent 12 }}
+          resources: {{ .Values.storefront.resources | toYaml | nindent 12 }}
+          startupProbe:
+            httpGet: {{ .Values.storefront.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.storefront.startupProbe.failureThreshold }} 
+            initialDelaySeconds:  {{ .Values.storefront.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.storefront.startupProbe.periodSeconds }}
+          readinessProbe:
+            httpGet: {{ .Values.storefront.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.storefront.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.storefront.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{.Values.storefront.readinessProbe.periodSeconds }}
+          livenessProbe:
+            httpGet: {{ .Values.storefront.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .Values.storefront.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.storefront.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{.Values.storefront.livenessProbe.periodSeconds }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.storefront.name }}
+spec:
+  ports: {{ .Values.storefront.spec.ports | toYaml | nindent 4 }}
+  selector:
+    app: {{ .Values.storefront.name }}
+  type: {{ .Values.storefront.spec.type }}

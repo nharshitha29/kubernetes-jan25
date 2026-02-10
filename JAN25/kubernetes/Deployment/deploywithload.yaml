@@ -5,7 +5,7 @@ metadata:
   labels:
      app: web1
   annotations:
-     kubernetes.io/change-cause: "react"
+     kubernetes.io/change-cause: "spring"
 spec:
    minReadySeconds: 3
    replicas: 3
@@ -25,7 +25,7 @@ spec:
      spec:
        containers:
          - name: spring
-           image: nharshitha29/react:v1.0
+           image: nharshitha29/spring:v1.0
            ports:
               - containerPort: 8080 
 ---

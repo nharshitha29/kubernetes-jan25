@@ -1,8 +1,7 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-4
+  name: deployment-3
   labels:
      app: web1
   annotations:
@@ -29,13 +28,13 @@ spec:
            image: nharshitha29/react:v1.0
            ports:
               - containerPort: 8080 
----       
+---
 apiVersion: v1
 kind: Service
 metadata:
-   name: service-4
+   name: service-3
 spec:
-   type: NodePort
+   type: LoadBalancer
    selector:
         app: web1 
    ports:
@@ -43,5 +42,3 @@ spec:
        port: 80
        protocol: TCP
        targetPort: 8080
-       nodePort: 30289
-

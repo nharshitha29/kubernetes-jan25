@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+   name: job
+spec:
+  schedule: '* * * * *'
+  jobTemplate:
+     metadata: 
+       labels:
+          app: job
+     spec:
+       template:
+         metadata:
+           labels:
+             app: job
+         spec:
+           containers:
+             - name: alpine
+               image: alpine:latest
+               command:
+                - sleep
+                - "3600s"
+           restartPolicy: OnFailure
+    
+      
+    

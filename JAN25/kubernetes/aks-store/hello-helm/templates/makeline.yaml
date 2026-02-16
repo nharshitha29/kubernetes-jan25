@@ -53,6 +53,6 @@ metadata:
   name: {{ .Values.name }}
 spec: 
   type: {{ .Values.spec1.type }}
-  potrs: {{ .Values.spec1.ports | toYaml | nindent 4 }}
+  ports: {{ .Values.spec1.ports | toYaml | nindent 4 }}
   selector: {{ .Values.labels | toYaml | nindent 6 }}
 

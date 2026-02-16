@@ -40,7 +40,10 @@ spec:
           startupProbe: {{ .Values.container1.startupProbe | toYaml | nindent 12 }}
           readinessProbe: {{ .Values.container1.readinessProbe | toYaml | nindent 12 }}
           livenessProbe: {{ .Values.container1.livenessProbe | toYaml | nindent 12 }}
-          volumeMounts: {{ .Values.container1.volumeMounts | toYaml | nindent 12 }}
+          volumeMounts:
+              - name: rabbitmq-enabled-plugins
+                mountPath: /etc/rabbitmq/enabled_plugins
+                subPath: enabled_plugins
       volumes:
         - name: {{ .Values.configmap.name }}
           configMap:

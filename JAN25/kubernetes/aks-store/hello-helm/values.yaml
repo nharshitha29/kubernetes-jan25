@@ -26,7 +26,7 @@ readinessProbe:
       timeoutSeconds: 5
       failureThreshold: 3
 type: ClusterIP
----
+
 configmap:
    name: rabbitmq-enabled-plugins
 secret:
@@ -70,10 +70,6 @@ container1:
       failureThreshold: 3
       initialDelaySeconds: 30
       periodSeconds: 10
-    volumeMounts:
-        name: rabbitmq-enabled-plugins
-        mountPath: /etc/rabbitmq/enabled_plugins
-        subPath: enabled_plugins
 path: enabled_plugins
 ports:
    - name: rabbitmq-amqp
@@ -83,7 +79,7 @@ ports:
      port: 15672
      targetPort: 15672
 type1: ClusterIP
----
+
 configmap1:
    name: order-service-configs
 secret1: 

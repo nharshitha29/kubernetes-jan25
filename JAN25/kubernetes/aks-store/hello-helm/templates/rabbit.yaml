@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 data:
   rabbitmq_enabled_plugins: |
@@ -49,7 +50,7 @@ spec:
           configMap:
             name: {{ .Values.configmap.name }}
             items:
-              - key: {{ .Values.configmap.name }}
+              - key: rabbitmq_enabled_plugins
                 path: {{ .Values.path }}
 ---
 apiVersion: v1

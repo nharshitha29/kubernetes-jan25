@@ -1,0 +1,63 @@
+services:
+  makeline:
+    name: makeline-service
+    type:  ClusterIP
+    ports:
+      - name: http
+        port: 3001
+        targetPort: 3001
+    selector:
+      app: makeline-service
+  mongodb:
+    name: mongodb
+    type: ClusterIP
+    ports:
+     - port: 27017
+    selector:
+      app: mongodb
+  order:
+    name:  order-service
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3000
+        targetPort: 3000
+    selector:
+      app: order-service
+  product:
+    name: product-service
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3002
+        targetPort: 3002
+    selector:
+      app: product-service
+  rabbitmq:
+    name: rabbitmq
+    selector:
+      app: rabbitmq
+    ports:
+      - name: rabbitmq-amqp
+        port: 5672
+        targetPort: 5672
+      - name: rabbitmq-http
+        port: 15672
+        targetPort: 15672
+    type: ClusterIP
+  storeadmin:
+    name: store-admin
+    ports:
+     - port: 80
+       targetPort: 8081
+    selector:
+       app: store-admin
+    type: LoadBalancer
+  storefront:
+    name: store-front
+    ports:
+      - port: 80
+        targetPort: 8080
+    selector:
+        app: store-front
+    type: LoadBalancer

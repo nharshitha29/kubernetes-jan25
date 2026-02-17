@@ -1,42 +1,39 @@
 ---
+{{- with .Values.apps.product }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.product.name }}
+  name: {{ .name }}
 spec:
   replicas: 1
   selector:
-    matchLabels: {{ .Values.product.labels | toYaml | nindent 6 }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
     metadata:
-      labels: {{ .Values.product.labels | toYaml | nindent 8 }}
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
         - name: product-service
-          image: ghcr.io/azure-samples/aks-store-demo/product-service:{{ .Values.product.tag }}
-          ports: {{ .Values.product.ports | toYaml | nindent 12 }}
+          image: {{ .container.image }}:{{ .container.tag }}
+          ports: {{ .container.ports | toYaml | nindent 12 }}
           env:
             - name: AI_SERVICE_URL
               value: "http://ai-service:5001/"
-          resources: {{ .Values.product.resources | toYaml | nindent 12 }}
-          readinessProbe:
-            httpGet: {{ .Values.product.readinessProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.product.readinessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.product.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.product.readinessProbe.periodSeconds }}
-          livenessProbe:
-            httpGet: {{ .Values.product.readinessProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.product.livenessProbe.failureThreshold }}
-            initialDelaySeconds:  {{ .Values.product.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.product.livenessProbe.periodSeconds }}
+          resources: {{ .container.resources | toYaml | nindent 12 }}
+          readinessProbe: {{ .container.readinessProbe | toYaml | nindent 12 }}
+          livenessProbe: {{ .container.livenessProbe | toYaml | nindent 12 }}
+{{- end }}
 ---
+{{- with .Values.services.product }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.product.name }}
-spec: 
-  type: {{ .Values.product.spec.type }}
-  ports: {{ .Values.product.spec.ports | toYaml | nindent 4 }}
-  selector: {{ .Values.product.labels | toYaml | nindent 6 }}
+  name: {{ .name }}
+spec:
+  type: {{ .type }}
+  ports: {{ .ports | toYaml | nindent 3 }}
+  selector: {{ .selector | toYaml | nindent 5 }}
+{{- end }}
+

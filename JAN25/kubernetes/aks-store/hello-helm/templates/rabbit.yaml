@@ -5,59 +5,65 @@ data:
     [rabbitmq_management,rabbitmq_prometheus,rabbitmq_amqp1_0].
 kind: ConfigMap
 metadata:
-  name: {{ .Values.configmap.name }}
+  name: rabbitmq-enabled-plugins
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.secret.name }}
+  name: rabbitmq-secrets
 data:
   RABBITMQ_DEFAULT_USER: dXNlcm5hbWU=
   RABBITMQ_DEFAULT_PASS: cGFzc3dvcmQ=
 ---
+{{- with .Values.apps.rabbitmq }}
 apiVersion: apps/v1
-kind: StatefulSet
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.rabbit.name }}
+  name: {{ .name }}
 spec:
-  serviceName: {{ .Values.rabbit.serviceName }}
-  replicas: {{ .Values.rabbit.replicas }}
+  serviceName: {{ .serviceName }}
+  replicas: {{ .replicas }}
   selector:
-    matchLabels: {{ .Values.rabbit.labels | toYaml | nindent 6 }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
     metadata:
-      labels: {{ .Values.rabbit.labels | toYaml | nindent 8 }}
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: {{ .Values.container1.name }}
-          image: mcr.microsoft.com/azurelinux/base/rabbitmq-server:{{ .Values.container1.tag }}
-          ports: {{ .Values.container1.ports | toYaml | nindent 12 }}
+        - name: rabbitmq
+          image: {{ .container.image }}:{{ .container.tag }}
+          ports: {{ .container.ports | toYaml | nindent 12 }}
           envFrom:
             - secretRef:
-                name: {{ .Values.secret.name }}
-          resources: {{ .Values.container1.resources | toYaml | nindent 12 }}
-          startupProbe: {{ .Values.container1.startupProbe | toYaml | nindent 12 }}
-          readinessProbe: {{ .Values.container1.readinessProbe | toYaml | nindent 12 }}
-          livenessProbe: {{ .Values.container1.livenessProbe | toYaml | nindent 12 }}
+                name: rabbitmq-secrets
+          resources: {{ .container.resources | toYaml | nindent 12 }}
+          startupProbe: {{ .container.startupProbe | toYaml | nindent 12 }}
+          readinessProbe: {{ .container.readinessProbe | toYaml | nindent 12 }}
+          livenessProbe: {{ .container.livenessProbe | toYaml | nindent 12 }}
           volumeMounts:
-              - name: rabbitmq-enabled-plugins
-                mountPath: /etc/rabbitmq/enabled_plugins
-                subPath: enabled_plugins
+            - name: rabbitmq-enabled-plugins
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
       volumes:
-        - name: {{ .Values.configmap.name }}
+        - name: rabbitmq-enabled-plugins
           configMap:
-            name: {{ .Values.configmap.name }}
+            name: rabbitmq-enabled-plugins
             items:
               - key: rabbitmq_enabled_plugins
-                path: {{ .Values.path }}
+                path: enabled_plugins
+{{- end }}
 ---
+{{- with .Values.services.rabbitmq }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.rabbit.name }}
+  name: {{ .name }}
 spec:
-  selector: {{ .Values.rabbit.labels | toYaml | nindent 6 }}
-  ports: {{ .Values.ports | toYaml | nindent 4}}
-  type: {{.Values.type1 }}
+  selector: {{ .selector | toYaml | nindent 4}}
+  ports: {{ .ports | toYaml | nindent 4 }}
+  type: {{ .type }}
+{{- end }}
+
+

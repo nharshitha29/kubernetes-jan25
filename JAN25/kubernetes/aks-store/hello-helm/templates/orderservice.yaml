@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.configmap1.name }}
+  name: order-service-configs
 data:
   ORDER_QUEUE_PORT: "5672"
   ORDER_QUEUE_HOSTNAME: "rabbitmq"
@@ -12,62 +12,54 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name:  {{ .Values.secret1.name }}
+  name: order-service-secrets
 data:
   ORDER_QUEUE_USERNAME: dXNlcm5hbWU=
   ORDER_QUEUE_PASSWORD: cGFzc3dvcmQ=
 ---
+{{- with .Values.apps.order }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.order.name }}
+  name: {{ .name }}
 spec:
-  replicas: {{ .Values.order.replicas }}
+  replicas: {{ .replicas }}
   selector:
-    matchLabels: {{ .Values.order.labels | toYaml | nindent 6 }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
-    metadata: 
-      labels: {{ .Values.order.labels | toYaml | nindent 8 }}
+    metadata:
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: {{ .Values.order.name }}
-          image: ghcr.io/azure-samples/aks-store-demo/order-service:{{ .Values.containers.tag }}
-          ports: {{ .Values.containers.ports | toYaml | nindent 12 }}
+        - name: order-service
+          image: {{ .container.image }}:{{ .container.tag }}
+          ports: {{ .container.ports | toYaml | nindent 12 }}
           envFrom:
             - configMapRef:
-                name: {{ .Values.configmap1.name }}
+                name: order-service-configs
             - secretRef:
-                name: {{ .Values.secret1.name }}
-          resources: {{ .Values.containers.resources | toYaml | nindent 12 }}
-          startupProbe: 
-            httpGet: {{ .Values.containers.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.containers.startupProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.containers.startupProbe.initialDelaySeconds }} 
-            periodSeconds: {{ .Values.containers.startupProbe.periodSeconds }} 
-          readinessProbe:
-            httpGet: {{ .Values.containers.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.containers.readinessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.containers.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.containers.readinessProbe.periodSeconds }}
-          livenessProbe:
-            httpGet: {{ .Values.containers.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.containers.livenessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.containers.livenessProbe.initialDelaySeconds}}
-            periodSeconds: {{ .Values.containers.livenessProbe.periodSeconds}}
-      initContainers:
-        - name: {{ .Values.initContainers.name }}
-          image: busybox:{{ .Values.initContainers.tag }}
-          command:
-            ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
-          resources: {{ .Values.containers.resources | toYaml | nindent 12 }}
+                name: order-service-secrets
+          resources: {{ .container.resources | toYaml | nindent 12 }}
+          startupProbe: {{ .container.startupProbe | toYaml | nindent 12 }}
+          readinessProbe: {{ .container.readinessProbe | toYaml | nindent 12 }}
+          livenessProbe: {{ .container.livenessProbe | toYaml | nindent 12 }}
+      initContainers: 
+          - name: wait-for-rabbitmq
+            image: busybox:1.37.0
+            command:
+               ["sh", "-c", "until nc -zv rabbitmq 5672; do echo waiting for rabbitmq; sleep 2; done;"]
+            resources: {{ .initContainers.resources | toYaml | nindent 14 }}
+{{- end }}
 ---
+{{- with .Values.services.order }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.order.name }}
+  name: {{ .name }}
 spec:
-  type: {{ .Values.spec.type }}
-  ports: {{ .Values.spec.ports | toYaml | nindent 4 }}
-  selector: {{ .Values.order.labels | toYaml | nindent 6 }}
+  type: {{ .type }}
+  ports: {{ .ports | toYaml | nindent 3 }}
+  selector: {{ .selector | toYaml | nindent 5 }}
+{{- end }}

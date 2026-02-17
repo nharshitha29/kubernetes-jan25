@@ -117,6 +117,170 @@ apps:
             failureThreshold: 5
             initialDelaySeconds: 3
             periodSeconds: 3
-
-
-
+  mongodb:
+     kind: StatefulSet
+     name: mongodb
+     serviceName: mongodb
+     replicas: 1
+     selector:
+         app: mongodb
+     labels:
+        app: mongodb
+     container:
+        image: mcr.microsoft.com/mirror/docker/library/mongo
+        tag: 4.2
+        ports:
+            - containerPort: 27017
+              name: mongodb
+        resources:
+            requests:
+              cpu: 5m
+              memory: 75Mi
+            limits:
+              cpu: 25m
+              memory: 1024Mi
+        livenessProbe:
+            exec:
+              command:
+                - mongo
+                - "--eval"
+                - db.runCommand('ping').ok
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+        readinessProbe:
+            exec:
+              command:
+                - mongo
+                - "--eval"
+                - db.runCommand('ping').ok
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+  order:
+     kind: Deployment
+     name: order-service
+     replicas: 1
+     selector:
+         app: order-service
+     labels:
+        app: order-service
+     container:
+        image: ghcr.io/azure-samples/aks-store-demo/order-service
+        tag: 2.1.0
+        ports:
+           - containerPort: 3000
+        resources:
+            requests:
+              cpu: 1m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+        startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 5
+            initialDelaySeconds: 20
+            periodSeconds: 10
+        readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+        livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+     initContainers:
+          resources:
+            requests:
+              cpu: 1m
+              memory: 50Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+  product:
+     kind: Deployment
+     name: product-service
+     replicas: 1
+     selector:
+         app: product-service
+     labels:
+        app: product-service
+     container:
+        image: ghcr.io/azure-samples/aks-store-demo/product-service
+        tag: 2.1.0
+        ports:
+           - containerPort: 3002
+        resources:
+            requests:
+              cpu: 1m
+              memory: 1Mi
+            limits:
+              cpu: 2m
+              memory: 20Mi
+        readinessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+        livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+  rabbitmq:
+     kind: StatefulSet
+     name: rabbitmq
+     serviceName: rabbitmq
+     replicas: 1
+     selector:
+         app: rabbitmq
+     labels:
+        app: rabbitmq
+     container:
+        image: mcr.microsoft.com/azurelinux/base/rabbitmq-server
+        tag: 3.13
+        ports:
+           - containerPort: 5672
+             name: rabbitmq-amqp
+           - containerPort: 15672
+             name: rabbitmq-http
+        resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+        startupProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 30
+            initialDelaySeconds: 10
+            periodSeconds: 10
+        readinessProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+        livenessProbe:
+            tcpSocket:
+              port: 5672
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10

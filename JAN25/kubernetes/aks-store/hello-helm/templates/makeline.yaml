@@ -1,58 +1,54 @@
+---
+{{- with .Values.apps.deployment }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.name }}
+  name: {{ .name }}
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .replicas }}
   selector:
-    matchLabels: {{ .Values.labels | toYaml | nindent 6 }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
     metadata:
-      labels: {{ .Values.labels | toYaml | nindent 8 }}
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: {{ .Values.name }}
-          image: ghcr.io/azure-samples/aks-store-demo/makeline-service:{{ .Values.tag }}
-          ports: {{ .Values.ports1 | toYaml | nindent 12 }}
+        - name: makeline-service
+          image: {{ .container.image }}:{{ .container.tag }}
+          ports: {{ .container.ports | toYaml | nindent 12 }}
           env:
-            - name: ORDER_QUEUE_URI
-              value: "amqp://rabbitmq:5672"
-            - name: ORDER_QUEUE_USERNAME
-              value: "username"
-            - name: ORDER_QUEUE_PASSWORD
-              value: "password"
-            - name: ORDER_QUEUE_NAME
-              value: "orders"
-            - name: ORDER_DB_URI
-              value: "mongodb://mongodb:27017"
-            - name: ORDER_DB_NAME
-              value: "orderdb"
-            - name: ORDER_DB_COLLECTION_NAME
-              value: "orders"
-          resources: {{ .Values.resources | toYaml | nindent 12 }}
+{{- range .container.env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+{{- end }}
+          resources: {{ .container.resources | toYaml | nindent 12 }}
           startupProbe: 
-            httpGet: {{ .Values.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
-            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            httpGet: {{ .container.startupProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .container.startupProbe.failureThreshold }}
+            periodSeconds: {{ .container.startupProbe.periodSeconds }}
           readinessProbe:
-            httpGet: {{ .Values.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.readinessProbe1.failureThreshold }}
-            initialDelaySeconds: {{ .Values.readinessProbe1.initialDelaySeconds }}
-            periodSeconds: {{ .Values.readinessProbe1.periodSeconds }}
+            httpGet: {{ .container.readinessProbe.httpGet | toYaml | nindent 14 }}
+            failureThreshold: {{ .container.readinessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .container.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .container.readinessProbe.periodSeconds }}
           livenessProbe:
-            httpGet: {{ .Values.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.livenessProbe1.failureThreshold }}
-            initialDelaySeconds: {{ .Values.livenessProbe1.initialDelaySeconds }}
-            periodSeconds: {{ .Values.livenessProbe1.periodSeconds }}
+            httpGet: {{ .container.livenessProbe.httpGet | toYaml | nindent 14 }} 
+            failureThreshold:  {{ .container.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .container.livenessProbe.initialDelaySeconds }}
+            periodSeconds:  {{ .container.livenessProbe.periodSeconds }}
+{{- end }}
 ---
+{{- with .Values.services.makeline }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.name }}
-spec: 
-  type: {{ .Values.spec1.type }}
-  ports: {{ .Values.spec1.ports | toYaml | nindent 4 }}
-  selector: {{ .Values.labels | toYaml | nindent 6 }}
+  name: {{ .name }}
+spec:
+  type: {{ .type }}
+  ports: {{ .ports | toYaml | nindent 4 }}
+  selector: {{ .selector | toYaml | nindent 4 }}
+{{- end }}
+
 

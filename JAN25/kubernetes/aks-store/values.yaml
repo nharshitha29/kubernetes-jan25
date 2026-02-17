@@ -1,0 +1,122 @@
+services:
+  makeline:
+    name: makeline-service
+    type:  ClusterIP
+    ports:
+      - name: http
+        port: 3001
+        targetPort: 3001
+    selector:
+      app: makeline-service
+  mongodb:
+    name: mongodb
+    type: ClusterIP
+    ports:
+     - port: 27017
+    selector:
+      app: mongodb
+  order:
+    name:  order-service
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3000
+        targetPort: 3000
+    selector:
+      app: order-service
+  product:
+    name: product-service
+    type: ClusterIP
+    ports:
+      - name: http
+        port: 3002
+        targetPort: 3002
+    selector:
+      app: product-service
+  rabbitmq:
+    name: rabbitmq
+    selector:
+      app: rabbitmq
+    ports:
+      - name: rabbitmq-amqp
+        port: 5672
+        targetPort: 5672
+      - name: rabbitmq-http
+        port: 15672
+        targetPort: 15672
+    type: ClusterIP
+  storeadmin:
+    name: store-admin
+    ports:
+     - port: 80
+       targetPort: 8081
+    selector:
+       app: store-admin
+    type: LoadBalancer
+  storefront:
+    name: store-front
+    ports:
+      - port: 80
+        targetPort: 8080
+    selector:
+        app: store-front
+    type: LoadBalancer
+apps:
+  deployment:
+     kind: Deployment
+     name: makeline-service
+     replicas: 1
+     selector:
+        app: makeline-service
+     labels:
+        app: makeline-service
+     container:
+         image: ghcr.io/azure-samples/aks-store-demo/makeline-service
+         tag: 2.1.0
+         ports:
+           - containerPort: 3001
+         env:
+           - name: ORDER_QUEUE_URI
+             value: "amqp://rabbitmq:5672"
+           - name: ORDER_QUEUE_USERNAME
+             value: "username"                         
+           - name: ORDER_QUEUE_PASSWORD
+             value: "password"
+           - name: ORDER_QUEUE_NAME
+             value: "orders"
+           - name: ORDER_DB_URI
+             value: "mongodb://mongodb:27017"
+           - name: ORDER_DB_NAME
+             value: "orderdb"
+           - name: ORDER_DB_COLLECTION_NAME
+             value: "orders"
+         resources:
+            requests:
+              cpu: 1m
+              memory: 6Mi
+            limits:
+              cpu: 5m
+              memory: 20Mi
+         startupProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 10
+            periodSeconds: 5
+         readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+         livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+
+
+

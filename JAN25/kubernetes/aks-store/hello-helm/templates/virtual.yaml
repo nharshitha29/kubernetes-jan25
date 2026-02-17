@@ -1,76 +1,58 @@
 ---
+{{- with .Values.apps.virtualcustomer }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.virtual.name }}
+  name: {{ .name }}
 spec:
-  replicas: {{ .Values.virtual.replicas }}
+  replicas: {{ .replicas }}
   selector:
-    matchLabels:
-      app: {{ .Values.virtual.name }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
     metadata:
-      labels:
-        app: {{ .Values.virtual.name }}
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: {{ .Values.virtual.name }}
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-customer:{{ .Values.virtual.tag }}
+        - name: virtual-customer
+          image: {{ .container.image }}:{{ .container.tag }}
           env:
             - name: ORDER_SERVICE_URL
               value: http://order-service:3000/
             - name: ORDERS_PER_HOUR
               value: "100"
-          resources: {{ .Values.virtual.resources | toYaml | nindent 12 }}
-          readinessProbe: 
-            exec: 
-               command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 18 }}
-            failureThreshold: {{ .Values.virtual.readinessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.virtual.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.virtual.readinessProbe.periodSeconds }}
-          livenessProbe:
-            exec: 
-               command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 18 }}
-            failureThreshold: {{ .Values.virtual.livenessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.virtual.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.virtual.livenessProbe.periodSeconds }}
+          resources: {{ .container.resources | toYaml | nindent 12 }}
+          readinessProbe: {{ .container.readinessProbe | toYaml | nindent 14 }}
+          livenessProbe: {{ .container.livenessProbe | toYaml | nindent 14 }} 
+{{- end }}
 ---
+{{- with .Values.apps.virtualworker }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.virtualworker.name }}
+  name: {{ .name }}
 spec:
-  replicas: {{ .Values.virtual.replicas }}
+  replicas: {{ .replicas }}
   selector:
-    matchLabels:
-      app: {{ .Values.virtualworker.name }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
     metadata:
-      labels:
-        app: {{ .Values.virtualworker.name }}
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: {{ .Values.virtualworker.name }}
-          image: ghcr.io/azure-samples/aks-store-demo/virtual-worker:{{ .Values.virtual.tag }}
+        - name: virtual-worker
+          image: {{ .container.image }}:{{ .container.tag }}
           env:
             - name: MAKELINE_SERVICE_URL
               value: http://makeline-service:3001
             - name: ORDERS_PER_HOUR
               value: "100"
-          resources: {{ .Values.virtual.resources | toYaml | nindent 12 }}
-          readinessProbe:
-            exec:
-              command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 16 }}
-            failureThreshold: {{ .Values.virtual.readinessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.virtual.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.virtual.readinessProbe.periodSeconds }}
-          livenessProbe:
-            exec:
-              command: {{ .Values.virtual.readinessProbe.exec.command | toYaml | nindent 16 }}
-            failureThreshold: {{ .Values.virtual.livenessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.virtual.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.virtual.livenessProbe.periodSeconds }}
+          resources: {{ .container.resources | toYaml | nindent 12 }}
+          readinessProbe: {{ .container.readinessProbe | toYaml | nindent 12 }}
+          livenessProbe: {{ .container.livenessProbe | toYaml | nindent 12 }}
+{{- end }}
+
+

@@ -284,3 +284,155 @@ apps:
             failureThreshold: 3
             initialDelaySeconds: 30
             periodSeconds: 10
+  storeadmin:
+     kind: Deployment
+     name: store-admin
+     replicas: 1
+     selector:
+         app: store-admin
+     labels:
+        app: store-admin
+     container:
+        image: ghcr.io/azure-samples/aks-store-demo/store-admin
+        tag: 2.1.0
+        ports:
+          - containerPort: 8081
+            name: store-admin
+        resources:
+          requests:
+             cpu: 1m
+             memory: 200Mi
+          limits:
+             cpu: 1000m
+             memory: 512Mi
+        startupProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+        readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+        livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+  storefront:
+    kind: Deployment
+    name: store-front
+    replicas: 1
+    selector:
+       app: store-front
+    labels:
+        app: store-front
+    container:
+       image: ghcr.io/azure-samples/aks-store-demo/store-front
+       tag: 2.1.0
+       ports:
+          - containerPort: 8080
+            name: store-front
+       resources:
+            requests:
+              cpu: 1m
+              memory: 200Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+       startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 5
+       readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 3
+       livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 5
+            initialDelaySeconds: 3
+            periodSeconds: 3
+  virtualcustomer:
+      kind: Deployment
+      name: virtual-customer
+      replicas: 1
+      selector:
+         app: virtual-customer
+      labels:
+        app: virtual-customer
+      container:
+        image: ghcr.io/azure-samples/aks-store-demo/virtual-customer
+        tag: 2.1.0
+        resources:
+            requests:
+              cpu: 1m
+              memory: 1Mi
+            limits:
+              cpu: 2m
+              memory: 20Mi
+        readinessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+        livenessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10
+  virtualworker:
+      kind: Deployment
+      name: virtual-worker
+      replicas: 1
+      selector:
+         app: virtual-worker
+      labels:
+         app: virtual-worker
+      container:
+         image:  ghcr.io/azure-samples/aks-store-demo/virtual-worker
+         tag: 2.1.0
+         resources:
+            requests:
+              cpu: 1m
+              memory: 1Mi
+            limits:
+              cpu: 2m
+              memory: 20Mi
+         readinessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+         livenessProbe:
+            exec:
+              command:
+                - cat
+                - /proc/1/status
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10

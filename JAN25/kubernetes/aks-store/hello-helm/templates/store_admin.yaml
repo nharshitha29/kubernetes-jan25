@@ -1,47 +1,37 @@
 ---
+{{- with .Values.apps.storeadmin }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .kind }}
 metadata:
-  name: {{ .Values.storeadmin.name }}
+  name: {{ .name }}
 spec:
-  replicas: {{ .Values.storeadmin.replicas }}
+  replicas: {{ .replicas }}
   selector:
-    matchLabels: 
-       app: {{ .Values.storeadmin.name }}
+    matchLabels: {{ .selector | toYaml | nindent 6 }}
   template:
     metadata:
-      labels: 
-        app: {{ .Values.storeadmin.name }}
+      labels: {{ .labels | toYaml | nindent 8 }}
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - name: {{ .Values.storeadmin.name }}
-          image: ghcr.io/azure-samples/aks-store-demo/store-admin:{{ .Values.storeadmin.tag }}
-          ports: {{ .Values.storeadmin.ports | toYaml | nindent 12 }}
-          resources: {{ .Values.storeadmin.resources | toYaml | nindent 12 }}
-          startupProbe:
-            httpGet: {{ .Values.storeadmin.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.storeadmin.startupProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.storeadmin.startupProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.storeadmin.startupProbe.periodSeconds }}
-          readinessProbe:
-            httpGet: {{ .Values.storeadmin.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.storeadmin.readinessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.storeadmin.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{.Values.storeadmin.readinessProbe.periodSeconds }}
-          livenessProbe:
-            httpGet: {{ .Values.storeadmin.startupProbe.httpGet | toYaml | nindent 14 }}
-            failureThreshold: {{ .Values.storeadmin.livenessProbe.failureThreshold }}
-            initialDelaySeconds: {{ .Values.storeadmin.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{.Values.storeadmin.livenessProbe.periodSeconds }}
+        - name: store-admin
+          image: {{ .container.image }}:{{ .container.tag }}
+          ports: {{ .container.ports | toYaml | nindent 12 }}
+          resources: {{ .container.resources | toYaml | nindent 12 }}
+          startupProbe: {{ .container.startupProbe | toYaml | nindent 12 }}
+          readinessProbe: {{ .container.readinessProbe | toYaml | nindent 12 }}
+          livenessProbe: {{ .container.livenessProbe | toYaml | nindent 12 }}
+{{- end }}
 ---
+{{- with .Values.services.storeadmin }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.storeadmin.name }}
+  name: {{ .name }}
 spec:
-  ports: {{ .Values.storeadmin.spec.ports | toYaml | nindent 4 }}
-  selector:
-    app: {{ .Values.storeadmin.name }}
-  type: {{ .Values.storeadmin.spec.type }}
+  ports: {{ .ports | toYaml | nindent 4}}
+  selector: {{ .selector | toYaml | nindent 6}}
+  type: {{ .type }}
+{{- end }}
+

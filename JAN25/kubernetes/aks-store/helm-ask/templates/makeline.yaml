@@ -23,9 +23,9 @@ spec:
             - name: {{ .name }}
               value: {{ .value }}
 {{- end }}
-          resources: {{ .container.resources | toYaml | nindent 12 }}
+          resources: {{ .container.resources | toYaml | nindent 14 }}
           startupProbe: 
-            httpGet: {{ .container.startupProbe.httpGet | toYaml | nindent 14 }}
+            httpGet: {{ .container.startupProbe.httpGet | toYaml | nindent 14}}
             failureThreshold: {{ .container.startupProbe.failureThreshold }}
             periodSeconds: {{ .container.startupProbe.periodSeconds }}
           readinessProbe:

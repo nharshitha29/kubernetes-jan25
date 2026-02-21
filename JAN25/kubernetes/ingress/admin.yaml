@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: admin
+spec:
+  minReadySeconds: 3
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector: 
+     matchLabels:
+        app: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+       maxSurge: 25%
+       maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+         app: web
+    spec:
+      containers:
+        - name: admin
+          image: shaikkhajaibrahim/ingress-admin:1.0
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: admin-service
+spec:
+  type: ClusterIP
+  selector:
+      app: web
+  ports:
+    - name: network
+      port: 80
+      protocol: TCP
+      targetPort: 80

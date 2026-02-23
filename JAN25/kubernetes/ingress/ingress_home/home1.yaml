@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-   name: admin
+   name: shop
 spec:
   minReadySeconds: 3
   replicas: 2
@@ -20,15 +20,15 @@ spec:
          app: web
     spec:
       containers:
-        - name: home
-          image: shaikkhajaibrahim/ingress-admin:1.0
+        - name: shop
+          image: nharshitha29/maison:v1.0
           ports:
             - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
 metadata:
-   name: admin-service
+   name: shop-service
 spec:
   type: ClusterIP
   selector:

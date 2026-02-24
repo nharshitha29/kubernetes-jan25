@@ -8,7 +8,7 @@ spec:
   revisionHistoryLimit: 10
   selector: 
      matchLabels:
-        app: web
+        app: shop
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-         app: web
+         app: shop
     spec:
       containers:
         - name: shop
@@ -32,7 +32,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-      app: web
+      app: shop
   ports:
     - name: network
       port: 80

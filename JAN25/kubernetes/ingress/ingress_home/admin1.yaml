@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-   name: shoping
+   name: admin
 spec:
   minReadySeconds: 3
   replicas: 2
   revisionHistoryLimit: 10
   selector: 
      matchLabels:
-        app: web
+        app: admin
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,10 +17,10 @@ spec:
   template:
     metadata:
       labels:
-         app: web
+         app: admin
     spec:
       containers:
-        - name: shop
+        - name: admin
           image: nharshitha29/catalog:v1.0
           ports:
             - containerPort: 80
@@ -32,7 +32,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-      app: web
+      app: admin
   ports:
     - name: network
       port: 80

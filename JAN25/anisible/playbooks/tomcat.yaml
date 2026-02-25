@@ -22,6 +22,10 @@
          create_home: yes
          shell: "{{ tomcat_shell }}"
          home: "{{ tomcat_home }}"
+    - name: check if /opt/tomcat/bin exists or not
+      ansible.builtin.stat:
+         path: /opt/tomcat/bin
+         register: tomcat_bin
     - name: install tomcat and extract files
       ansible.builtin.unarchive:
          src: "{{ tomcat_download_url }}"
@@ -31,6 +35,7 @@
          remote_src: yes
          extra_opts:
               --strip-components=1
+      when: tomcat_bin.stat.exists == false 
     - name: copy the tomcat user 
       ansible.builtin.template:
          src: templates/tomcat-users.xml.j2

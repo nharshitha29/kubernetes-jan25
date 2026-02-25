@@ -8,17 +8,26 @@
       when: ansible_facts["distribution"] != "Ubuntu" 
     - name: install openjdk 17
       ansible.builtin.apt:
-         name: openjdk-17-jdk 
+         name: "{{ java_package_name }}"
          state: present
          update_cache: yes
     - name: create tomcat group
       ansible.builtin.group:
-         name: tomcat
+         name: "{{ tomcat_user }}"
          state: present
     - name: create tomcat user
       ansible.builtin.user:
-         user: tomcat
-         group: tomcat
+         user: "{{ tomcat_user }}"
+         group: "{{ tomcat_group }}"
          create_home: yes
-         shell: /bin/false
-         home: /opt/tomcat
+         shell: "{{ tomcat_shell }}"
+         home: "{{ tomcat_home }}"
+    - name: install tomcat and extract files
+      ansible.builtin.unarchive:
+         src: "{{ tomcat_download_url }}"
+         dest: "{{ tomcat_home }}"
+         owner: "{{ tomct_user }}"
+         group: "{{ tomcat_group }}"
+         remote_src: yes
+         extra_opts:
+              --strip-components=1

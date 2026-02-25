@@ -1,0 +1,24 @@
+- name: install tomcat 10 on ubuntu 24
+  hosts: appserver
+  become: yes
+  tasks:
+    - name: fail if it is not ubuntu
+      ansible.builtin.fail:
+         msg: playbook runs on only ubuntu
+      when: ansible_facts["distribution"] != "Ubuntu" 
+    - name: install openjdk 17
+      ansible.builtin.apt:
+         name: openjdk-17-jdk 
+         state: present
+         update_cache: yes
+    - name: create tomcat group
+      ansible.builtin.group:
+         name: tomcat
+         state: present
+    - name: create tomcat user
+      ansible.builtin.user:
+         user: tomcat
+         group: tomcat
+         create_home: yes
+         shell: /bin/false
+         home: /opt/tomcat

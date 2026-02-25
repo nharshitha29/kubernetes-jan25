@@ -33,8 +33,8 @@
               --strip-components=1
     - name: copy the tomcat user 
       ansible.builtin.copy:
-         src: files\tomcat-users.xml
-         dest: "{{ tomcat_home }}"/conf/tomcat-users.xml
+         src: files/tomcat-users.xml
+         dest: "{{ tomcat_home }}/conf/tomcat-users.xml"
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
          mode: '0600'

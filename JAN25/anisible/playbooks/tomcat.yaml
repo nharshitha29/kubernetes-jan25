@@ -55,11 +55,12 @@
     - name: copy the tomcat service file
       ansible.builtin.template:
          src: templates/tomcat-service.j2
-         dest: "{{ tomcat_home }}/etc/systemd/system/tomcat.service"
+         dest: /etc/systemd/system/tomcat.service
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
     - name: enable and start tomcat
       ansible.builtin.systemd_service:
+         name: tomcat
          state: started
          daemon_reload: true
          enabled: true

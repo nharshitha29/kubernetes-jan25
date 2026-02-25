@@ -1,5 +1,5 @@
 - name: install tomcat 10 on ubuntu 24
-  hosts: appserver
+  hosts: all
   become: yes
   tasks:
     - name: fail if it is not ubuntu
@@ -32,9 +32,36 @@
          extra_opts:
               --strip-components=1
     - name: copy the tomcat user 
-      ansible.builtin.copy:
-         src: files/tomcat-users.xml
+      ansible.builtin.template:
+         src: templates/tomcat-users.xml.j2
          dest: "{{ tomcat_home }}/conf/tomcat-users.xml"
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
          mode: '0600'
+    - name: copy the context manager file
+      ansible.builtin.template:
+         src: templates/context.xml.j2
+         dest: "{{ tomcat_home }}/webapps/manager/META-INF/context.xml"
+         owner: "{{ tomcat_user }}"
+         group: "{{ tomcat_group }}"
+         mode: '0600'
+    - name: copy the context host manager file
+      ansible.builtin.template:
+         src: templates/context.xml.j2
+         dest: "{{ tomcat_home }}/webapps/host-manager/META-INF/context.xml"
+         owner: "{{ tomcat_user }}"
+         group: "{{ tomcat_group }}"
+         mode: '0600'
+    - name: copy the tomcat service file
+      ansible.builtin.template:
+         src: templates/tomcat-service.j2
+         dest: "{{ tomcat_home }}/etc/systemd/system/tomcat.service"
+         owner: "{{ tomcat_user }}"
+         group: "{{ tomcat_group }}"
+    - name: enable and start tomcat
+      ansible.builtin.systemd_service:
+         state: started
+         daemon_reload: true
+         enabled: true
+         
+    

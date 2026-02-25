@@ -26,7 +26,7 @@
       ansible.builtin.unarchive:
          src: "{{ tomcat_download_url }}"
          dest: "{{ tomcat_home }}"
-         owner: "{{ tomct_user }}"
+         owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
          remote_src: yes
          extra_opts:

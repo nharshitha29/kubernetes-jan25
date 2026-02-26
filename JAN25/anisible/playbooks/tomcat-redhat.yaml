@@ -8,7 +8,7 @@
       when: ansible_facts["distribution"] != "RedHat"
     - name: install openjdk 21
       ansible.builtin.dnf:
-         name: "{{ redhat_package_name }}"
+         name: "{{ java_package_name }}"
          state: present
          update_cache: yes
     - name: create tomcat group

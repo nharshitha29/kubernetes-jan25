@@ -5,19 +5,12 @@
     - name: fail if it is not ubuntu
       ansible.builtin.fail:
          msg: playbook runs on only ubuntu
-      when: ansible_facts["distribution"] != "Ubuntu" and ansible_facts["distribution"] != "RedHat"
-    - name: install openjdk 17
-      ansible.builtin.apt:
-         name: "{{ java_package_name }}"
-         state: present
-         update_cache: yes
-      when: ansible_facts["distribution"] == "Ubuntu"
+      when: ansible_facts["distribution"] != "RedHat"
     - name: install openjdk 21
       ansible.builtin.dnf:
          name: "{{ redhat_package_name }}"
          state: present
          update_cache: yes
-      when: ansible_facts["distribution"] == "RedHat"
     - name: create tomcat group
       ansible.builtin.group:
          name: "{{ tomcat_user }}"
@@ -72,20 +65,10 @@
          - enable and restart tomcat service
     - name: copy the tomcat service file
       ansible.builtin.template:
-         src: templates/tomcat-service.j2
-         dest: /etc/systemd/system/tomcat.service
-         owner: "{{ tomcat_user }}"
-         group: "{{ tomcat_group }}"
-      when: ansible_facts["distribution"] == "Ubuntu"
-      notify:
-         - enable and restart tomcat service
-    - name: copy the tomcat service file
-      ansible.builtin.template:
          src: templates/redhat-service.j2
          dest: /etc/systemd/system/tomcat.service
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
-      when: ansible_facts["distribution"] == "RedHat"
       notify:
          - enable and restart tomcat service
     - name:  start tomcat

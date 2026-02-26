@@ -1,4 +1,5 @@
 java_package_name: openjdk-17-jdk 
+redhat_package_name: openjdk-21-jdk 
 tomcat_user: tomcat
 tomcat_group: tomcat
 tomcat_shell: /bin/false

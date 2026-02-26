@@ -4,7 +4,7 @@
   tasks:
     - name: fail if it is not ubuntu
       ansible.builtin.fail:
-         msg: playbook runs on only ubuntu
+         msg: playbook runs on only redhat
       when: ansible_facts["distribution"] != "RedHat"
     - name: install openjdk 21
       ansible.builtin.dnf:

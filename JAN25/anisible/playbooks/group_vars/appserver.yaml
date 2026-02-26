@@ -8,3 +8,5 @@ tomcat_manager_password: manager@123
 tomcat_host_user: admin
 tomcat_host_password: admin@123
 allow_cidr: ".*"
+java_package_name: openjdk-17-jdk 
+java_home: /usr/lib/jvm/java-17-openjdk-amd64

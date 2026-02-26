@@ -1,5 +1,5 @@
 - name: install tomcat 10 on ubuntu 24
-  hosts: appservers
+  hosts: appserver
   become: true
   tasks:
     - name: fail if it is not ubuntu and redhat

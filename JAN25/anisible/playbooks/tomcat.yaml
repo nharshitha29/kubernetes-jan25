@@ -1,6 +1,6 @@
 - name: install tomcat 10 on ubuntu 24
   hosts: all
-  become: yes
+  become: true
   tasks:
     - name: fail if it is not ubuntu
       ansible.builtin.fail:
@@ -43,6 +43,8 @@
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
          mode: '0600'
+      notify:
+         - enable and restart tomcat service
     - name: copy the context manager file
       ansible.builtin.template:
          src: templates/context.xml.j2
@@ -50,6 +52,8 @@
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
          mode: '0600'
+      notify:
+         - enable and restart tomcat service
     - name: copy the context host manager file
       ansible.builtin.template:
          src: templates/context.xml.j2
@@ -57,17 +61,26 @@
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
          mode: '0600'
+      notify:
+         - enable and restart tomcat service
     - name: copy the tomcat service file
       ansible.builtin.template:
          src: templates/tomcat-service.j2
          dest: /etc/systemd/system/tomcat.service
          owner: "{{ tomcat_user }}"
          group: "{{ tomcat_group }}"
-    - name: enable and start tomcat
-      ansible.builtin.systemd_service:
+      notify:
+         - enable and restart tomcat service
+    - name:  start tomcat
+      ansible.builtin.systemd:
          name: tomcat
          state: started
-         daemon_reload: true
-         enabled: true
-         
+         enabled: true 
+  handlers:
+      - name: enable and restart tomcat service
+        ansible.builtin.systemd:
+          name: tomcat
+          state: restarted
+          daemon_reload: true
+          enabled: true  
     

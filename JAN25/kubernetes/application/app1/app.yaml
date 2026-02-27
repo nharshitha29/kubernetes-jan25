@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: hello
-          image: nharshitha29/catalog:v1.0
+          image: nharshitha29/maison:v1.0
           ports:
             - containerPort: 80
 ---

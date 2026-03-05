@@ -32,5 +32,5 @@ spec:
      - name: web1
        port: 80
        protocol: TCP
-       nodePort: 30000
+       nodePort: 30283
        

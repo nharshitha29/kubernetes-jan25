@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: ReplicaSet
+kind: Deployment
 metadata: 
     name: replicaset
 spec:
@@ -25,12 +25,12 @@ kind: Service
 metadata:
    name: service-1
 spec:
-   type: LoadBalancer
+   type: NodePort
    selector:
         app: web 
    ports:
      - name: web1
        port: 80
        protocol: TCP
-       targetPort: 80
+       nodePort: 30283
        

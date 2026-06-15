@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: example-1
+  labels:
+    purpose: learning
+    env: dev
+  annotations:
+     kubernetes.io/change-cause: "dotnet"
+spec:
+  minReadySeconds: 2
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+       app: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+       maxSurge: 25%
+       maxUnavailable: 25%
+  template:
+    metadata:
+       name: Deployment
+       labels:
+         app: web
+    spec:
+      containers:
+        - name: web-1
+          image: nharshitha29/dotnet:v1.0
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: service-1
+spec:
+  type: LoadBalancer
+  selector:
+    app: web
+  ports:
+    - name: web-http
+      port: 80
+      protocol: TCP
+      targetPort: 5000

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-3
+  name: deployment-1
   labels:
      app: web1
   annotations:
@@ -32,7 +32,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-   name: service-3
+   name: service-1
 spec:
    type: LoadBalancer
    selector:
